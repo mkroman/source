@@ -2,6 +2,10 @@
 
 module Source
   class Server
+    class ConnectionError < StandardError; end
+
+    attr_accessor :host, :port, :pass
+
     PingPacket = "\x69"
     InfoPacket = "TSource Engine Query\x00"
 
@@ -11,8 +15,8 @@ module Source
       end
     end
 
-    def initialize host, port = 27015
-      @host, @port = host, port
+    def initialize host, port = 27015, password = nil
+      @host, @port, @pass = host, port, password
 
       @socket, @connected = UDPSocket.new, false
     end
@@ -30,7 +34,7 @@ module Source
     def read
       raise ConnectionError, 'Not connected to server' unless @connected
 
-      response = @socket.recvfrom(1024)[0][4..-1]
+      @socket.recvfrom(1024)[0][4..-1]
     end
 
     def info
@@ -40,6 +44,11 @@ module Source
       response = read.unpack 'CCZ*Z*Z*Z*vc7Z*c'
 
       %w{type version name map game description appid players slots bots dedicated os password secure version EDF}.pair response
+    end
+
+    def rcon password = nil
+      @pass ||= password
+      @rcon ||= RCON.for_server self
     end
   end
 end

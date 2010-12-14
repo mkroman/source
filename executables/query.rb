@@ -7,7 +7,9 @@ require 'source'
 puts "=> Source #{Source::Version}"
 puts
 
-server = Source::Server.connect '77.66.39.4', 27015
+server = Source::Server.connect 'maero.dk', 27015, 'ingenveddet'
+server.rcon
+
 info = server.info
 
 puts '-' * info["name"].length

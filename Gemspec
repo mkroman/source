@@ -4,7 +4,7 @@
 Gem::Specification.new do |spec|
   spec.name    = "source"
   spec.version = "1.0.0"
-  spec.summary = "Source engine server qury library."
+  spec.summary = "Source engine server query library."
 
   spec.author  = "Mikkel Kroman"
   spec.email   = "mk@maero.dk"
