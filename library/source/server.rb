@@ -48,7 +48,7 @@ module Source
 
     def rcon password = nil
       @pass ||= password
-      @rcon ||= RCON.for_server self
+      @rcon ||= RCON.new @host, @port, @password
     end
   end
 end
