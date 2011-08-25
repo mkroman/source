@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'socket'
 
 module Source
   class RCON
@@ -6,17 +7,10 @@ module Source
 
     attr_accessor :host, :port
 
-    ExecutionCommand = 2
-    AuthenticationCommand = 3
-
-    def self.for_server server
-      new(server.host, server.port, server.pass).tap do |this|
-        this.connect
-      end
-    end
+    AuthenticationCommand = "challenge rcon"
 
     def initialize host, port = 27015, password = nil
-      @host, @port, @pass, @id = host, port, password, 0
+      @host, @port, @pass, @challenge = host, port, password, ""
     end
 
     def connected?; @socket and not @socket.closed? end
@@ -24,31 +18,31 @@ module Source
     def connect
       raise ConnectionError, "Connection has already been established" if connected?
 
-      @socket = TCPSocket.new @host, @port
+      @socket = UDPSocket.new 
 
       authenticate
     end
 
-    def transmit command, key, value = ''
+    def transmit packet
       raise ConnectionError, 'Connection has not been established' unless connected?
-
-      String.new.tap do |buffer|
-        buffer.<< [(@id += 1), command].pack 'VV'
-        buffer << [key, ?\x00, value, ?\x00].join
-
-        buffer.insert 0, [buffer.length].pack(?V)
-
-        puts ">> #{buffer.inspect}"
-        @socket.write buffer
-      end
+      @socket.send "\xFF\xFF\xFF\xFF#{packet}", 0, @host, @port
     end
 
-  private
+    def read
+      @socket.readpartial 4096
+    end
+
+    def send command
+      transmit "rcon #{@challenge} \"#{@pass}\" #{command}"
+    end
+
+    def authenticated?; @challenge end
 
     def authenticate
-      transmit AuthenticationCommand, @pass 
+      transmit AuthenticationCommand
 
-      puts "<< #{@socket.readpartial 4096}" # FIXME
+      challenge = @socket.readpartial 1024
+      @challenge = challenge.gsub /[^\d+]/, ""
     end
   end
 end
