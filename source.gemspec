@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |spec|
   spec.name    = "source"
-  spec.version = "1.0.1"
+  spec.version = "1.0.2"
   spec.summary = "Source engine server query library."
   spec.homepage = "https://github.com/mkroman/source"
 
