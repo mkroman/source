@@ -7,7 +7,7 @@ require 'source/server'
 require 'source/extensions'
 
 module Source
-  class << Version = [1,0]
+  class << Version = [1,0,1]
     def to_s; join '.' end
   end
 end
